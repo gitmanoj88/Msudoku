@@ -1,0 +1,31 @@
+name: Build APK
+   on: [push]  # Trigger the workflow on every code push
+
+   jobs:
+     build-apk:
+       runs-on: ubuntu-latest  # Use GitHub's Linux VM
+       steps:
+         - name: Checkout code
+           uses: actions/checkout@v2  # Pull your code into the VM
+
+         - name: Set up Python
+           uses: actions/setup-python@v2
+           with:
+             python-version: 3.9  # Use Python 3.9
+
+         - name: Install Buildozer and dependencies
+           run: |  # Install Buildozer + Android tools
+             sudo apt-get update
+             sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libtinfo5
+             pip install buildozer
+
+         - name: Build the APK
+           run: |  # Run Buildozer
+             buildozer init
+             buildozer -v android debug
+
+         - name: Upload APK as artifact
+           uses: actions/upload-artifact@v2  # Save the APK
+           with:
+             name: myapp-apk
+             path: bin/*.apk  # Path to the generated APK
